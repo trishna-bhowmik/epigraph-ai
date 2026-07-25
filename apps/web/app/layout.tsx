@@ -5,8 +5,8 @@ import { Toaster } from "sonner";
 
 import "./globals.css";
 
-import { QueryProvider } from "@/components/providers/query-provider";
-import { cn } from "@/lib/utils";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -24,8 +24,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "AI Mock Interview Platform",
-  description: "Practice AI-powered interviews",
+  title: "EpiGraph AI | Epidemic Intelligence",
+  description: "Model, predict, and explain disease spread with graph AI.",
 };
 
 export default function RootLayout({
@@ -34,24 +34,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={cn(
-        "font-sans",
-        geist.variable,
-        geistSans.variable,
-        geistMono.variable
-      )}
-    >
+    <html lang="en">
       <body>
         <QueryProvider>
-          {children}
-
-          <Toaster
-            position="top-right"
-            richColors
-            closeButton
-          />
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

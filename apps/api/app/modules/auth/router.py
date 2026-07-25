@@ -8,7 +8,10 @@ from app.modules.users.schema import (
     UserCreate,
     UserLogin,
     UserResponse,
+    UserUpdate,
 )
+from app.modules.auth.dependencies import get_current_user
+from app.modules.users.model import User
 
 router = APIRouter(
     prefix="/auth",
@@ -49,3 +52,30 @@ def login(
             status_code=401,
             detail=str(e),
         )
+    
+    
+@router.get("/me", response_model=UserResponse)
+def get_me(
+    current_user: User = Depends(get_current_user),
+):
+    return current_user
+
+
+@router.put("/me", response_model=UserResponse)
+def update_me(
+    data: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        return AuthService(db).update_profile(current_user, data)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+
+@router.delete("/me", status_code=204)
+def delete_me(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    AuthService(db).delete_profile(current_user)

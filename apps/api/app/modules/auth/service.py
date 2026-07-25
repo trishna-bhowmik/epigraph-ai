@@ -7,7 +7,7 @@ from app.modules.auth.security import (
 )
 from app.modules.users.model import User
 from app.modules.users.repository import UserRepository
-from app.modules.users.schema import UserCreate
+from app.modules.users.schema import UserCreate, UserUpdate
 
 
 class AuthService:
@@ -44,3 +44,24 @@ class AuthService:
             "access_token": token,
             "token_type": "bearer",
         }
+
+    def update_profile(self, user: User, data: UserUpdate):
+        if data.email and data.email != user.email:
+            existing = self.user_repo.get_by_email(data.email)
+            if existing:
+                raise ValueError("Email already registered")
+            user.email = data.email
+
+        if data.full_name:
+            user.full_name = data.full_name
+
+        if data.password:
+            user.password_hash = hash_password(data.password)
+
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def delete_profile(self, user: User):
+        self.db.delete(user)
+        self.db.commit()
